@@ -942,11 +942,16 @@ namespace Three {
 											if (usedSubmesh.Value.meshFilter == meshFilter && usedSubmesh.Value.subMeshIndex == i) {
 												writeJSON(6, "\"geometry\": \"" + geoKey + "\",");
 
+
+
 												foreach(KeyValuePair<string, MeshMaterialLink> meshMaterialLink in meshMaterialLinks) {
 													if (meshMaterialLink.Value.meshFilter == meshFilter && i == meshMaterialLink.Value.subMeshIndex) {
 														writeJSON(6, "\"material\": \"" + matKey + "\",");
+														break;
 													}
 												}
+
+												break;
 											}
 										}
 
