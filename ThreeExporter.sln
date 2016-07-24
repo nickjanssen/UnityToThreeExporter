@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreeExporter", "ThreeExporter\ThreeExporter.csproj", "{7B2BF8C3-45F4-464A-A822-5478F0D02AFB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7B2BF8C3-45F4-464A-A822-5478F0D02AFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B2BF8C3-45F4-464A-A822-5478F0D02AFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B2BF8C3-45F4-464A-A822-5478F0D02AFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B2BF8C3-45F4-464A-A822-5478F0D02AFB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = ThreeExporter\ThreeExporter.csproj
+	EndGlobalSection
+EndGlobal
