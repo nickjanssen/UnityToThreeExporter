@@ -54,7 +54,7 @@ namespace Three {
 		int decimalPlaces = 4;
 		float lightMapRGBMConstant = 5.0f;
 		string targetPath = Path.GetFullPath(".") + Path.DirectorySeparatorChar + "ThreeExport";
-		string subFolderName = Path.GetFileNameWithoutExtension(EditorSceneManager.GetActiveScene().name);
+		string subFolderName;
 		string jsonFilename = "scene.json";
 		bool openFolderAfterExporting = true;
 		bool exportCameras = true;
@@ -72,6 +72,11 @@ namespace Three {
 		[MenuItem("Window/Three.js Exporter")]
 		public static void ShowWindow() {
 			EditorWindow.GetWindow(typeof(Exporter));
+		}
+
+		void OnEnable()
+		{
+			SetSceneName (false);
 		}
 
 		void Export() {
@@ -128,6 +133,18 @@ namespace Three {
 			}
 
 		}
+
+		void SetSceneName(bool showWarning)
+		{
+			string name = EditorSceneManager.GetActiveScene ().name;
+
+			if (showWarning && name == "") {
+				EditorUtility.DisplayDialog ("Cannot find scene.", "Please save the scene you are currently working on or load a different one.", "");
+			} else {
+				subFolderName = Path.GetFileNameWithoutExtension (name);
+			}
+		}
+
 		
 		void OnGUI()
 		{
@@ -159,7 +176,7 @@ namespace Three {
 				GUILayout.BeginHorizontal ();
 				GUILayout.FlexibleSpace ();
 				if (GUILayout.Button ("Set to Scene Name")) {
-					subFolderName = Path.GetFileNameWithoutExtension (EditorSceneManager.GetActiveScene().name);
+					SetSceneName (true);
 				}
 				GUILayout.EndHorizontal ();
 

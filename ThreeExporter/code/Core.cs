@@ -11,6 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
+
 namespace Three {
 	public class Core {
 
@@ -265,12 +266,17 @@ namespace Three {
 			foreach (Transform transform in transforms) {
 				MeshFilter meshFilter = transform.GetComponent<MeshFilter>();
 				if (meshFilter != null) {
-					for (int i = 0; i < meshFilter.sharedMesh.subMeshCount; i++) {
-						Submesh submesh;
-						submesh.mesh = meshFilter.sharedMesh;
-						submesh.meshFilter = meshFilter;
-						submesh.subMeshIndex = i;
-						usedSubmeshes.Add(System.Guid.NewGuid().ToString(), submesh);
+					if (meshFilter.sharedMesh == null) {
+						Debug.LogError("'" + transform.name + "' appears to be missing a mesh! Please verify its mesh filter.", transform);
+					}
+					else {
+						for (int i = 0; i < meshFilter.sharedMesh.subMeshCount; i++) {
+							Submesh submesh;
+							submesh.mesh = meshFilter.sharedMesh;
+							submesh.meshFilter = meshFilter;
+							submesh.subMeshIndex = i;
+							usedSubmeshes.Add(System.Guid.NewGuid().ToString(), submesh);
+						}
 					}
 				}
 			}
@@ -288,7 +294,7 @@ namespace Three {
 					for (int i=0; i < mats.Length; i ++) {
 
 						if (!mats[i]) {
-							Debug.LogWarning("GameObject has a bad/missing material: " + transform.name);
+							Debug.LogError("'" + transform.name + "' has a bad/missing material!", transform);
 							continue;
 						}
 
@@ -817,9 +823,12 @@ namespace Three {
 
 						writeJSON(4, "\"children\": [");
 
+						bool hasWrittenChildren = false;
+
 						if (settings.exportColliders) {
 							Collider collider = transform.GetComponent<Collider>();
 							if (collider != null) {												
+								hasWrittenChildren = true;
 								writeJSON(5, "{");
 								
 								{
@@ -913,7 +922,7 @@ namespace Three {
 						}
 
 						MeshFilter meshFilter = transform.GetComponent<MeshFilter>();
-						if (meshFilter != null) {
+						if (meshFilter != null && meshFilter.sharedMesh != null) {
 
 							for (int i = 0; i < meshFilter.sharedMesh.subMeshCount; i++) {
 
@@ -932,6 +941,7 @@ namespace Three {
 								}
 
 								if (geoKey != null && matKey != null ) {
+									hasWrittenChildren = true;
 									writeJSON(5, "{");
 									{
 										writeJSON(6, "\"uuid\": \"" + System.Guid.NewGuid().ToString() + "\",");
@@ -969,6 +979,7 @@ namespace Three {
 
 						MonoBehaviour monoBehaviour = transform.GetComponent<MonoBehaviour>();
 						if (monoBehaviour != null) {
+							hasWrittenChildren = true;
 								
 							writeJSON(5, "{");
 							{
@@ -1017,8 +1028,10 @@ namespace Three {
 
 						}
 
-						jsonFile.Length = jsonFile.Length - (1 + System.Environment.NewLine.Length);
-						writeJSON(0, "", true);
+						if (hasWrittenChildren) {
+							jsonFile.Length = jsonFile.Length - (1 + System.Environment.NewLine.Length);
+							writeJSON (0, "", true);
+						}
 
 						writeJSON(4, "],");
 											
