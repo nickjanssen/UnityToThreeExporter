@@ -614,17 +614,16 @@ namespace Three {
 					string aoMapId = null;
 
 					foreach(KeyValuePair<string, Material> usedMaterial in usedMaterials) {
-						if (usedMaterial.Value == meshMaterialLink.Value.material) {
-							if (meshMaterialLink.Value.material.HasProperty("_MainTex") &&
-							    mat.HasProperty("_MainTex") ) {
+						if (usedMaterial.Value == mat) {
+							if (mat.HasProperty("_MainTex")) {
 								mapId = usedMaterial.Key + "_MainTex";
 							}
-							if (meshMaterialLink.Value.material.HasProperty("_BumpMap") &&
-							    mat.HasProperty("_BumpMap") ) {
+							if (mat.HasProperty("_BumpMap") && 
+								mat.GetTexture ("_BumpMap")) {
 								normalMapId = usedMaterial.Key + "_BumpMap";
 							}
-							if (meshMaterialLink.Value.material.HasProperty("_OcclusionMap") &&
-							    mat.HasProperty("_OcclusionMap") ) {
+							if (mat.HasProperty("_OcclusionMap") && 
+								mat.GetTexture ("_OcclusionMap")) {
 								aoMapId = usedMaterial.Key + "_OcclusionMap";
 							}
 						}
