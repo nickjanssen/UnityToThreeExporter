@@ -282,7 +282,7 @@ namespace Three {
 			}
 
 			Dictionary<string, MeshMaterialLink> meshMaterialLinks = new Dictionary<string, MeshMaterialLink> ();
-			Dictionary<string, MaterialTextureLink> usedTextures = new Dictionary<string, MaterialTextureLink> ();
+			Dictionary<string, MaterialTextureLink> usedLightmapTextures = new Dictionary<string, MaterialTextureLink> ();
 			Dictionary<string, TextureImageLink> usedImages = new Dictionary<string, TextureImageLink> ();
 			List<Texture> addedTextures = new List<Texture>();
 
@@ -311,15 +311,15 @@ namespace Three {
 							Texture tex = meshMaterialLink.material.GetTexture(texName);
 							if (tex != null && !addedTextures.Contains(tex)) {
 								
-								MaterialTextureLink materialTextureLink;
-								materialTextureLink.texture = tex;
-								materialTextureLink.material = meshMaterialLink.material;
-								materialTextureLink.textureUnityIdentifier = texName;
-								materialTextureLink.needsCleanup =  false;
+//								MaterialTextureLink materialTextureLink;
+//								materialTextureLink.texture = tex;
+//								materialTextureLink.material = meshMaterialLink.material;
+//								materialTextureLink.textureUnityIdentifier = texName;
+//								materialTextureLink.needsCleanup =  false;
 																			
 								TextureImageLink textureImageLink;
-								textureImageLink.texture = materialTextureLink.texture;
-								string texturePath = AssetDatabase.GetAssetPath(materialTextureLink.texture);
+								textureImageLink.texture = tex;
+								string texturePath = AssetDatabase.GetAssetPath(tex);
 								
 								var textureExtension = System.IO.Path.GetExtension(texturePath).ToLower();
 								if (textureExtension != ".png" && textureExtension != ".jpg") {
@@ -330,7 +330,7 @@ namespace Three {
 								textureImageLink.filename = GetValidFileNameFromString(meshMaterialLink.material.name) + "_" +System.IO.Path.GetFileName(texturePath);	
 								
 								addedTextures.Add(tex);
-								usedTextures.Add(System.Guid.NewGuid().ToString(), materialTextureLink);
+//								usedTextures.Add(System.Guid.NewGuid().ToString(), materialTextureLink);
 								usedImages.Add(System.Guid.NewGuid().ToString(), textureImageLink);
 							}
 						});
@@ -357,11 +357,13 @@ namespace Three {
 						lightMapMaterial.hideFlags = HideFlags.HideAndDontSave;
 						MaterialTextureLink materialTextureLink;
 						materialTextureLink.texture = textureImageLink.texture;
+						lightMapMaterial.name = "lightmap";
+						lightMapMaterial.SetTexture ("_MainTex", materialTextureLink.texture);
 						materialTextureLink.material = lightMapMaterial;
 						materialTextureLink.textureUnityIdentifier = "_MainTex";
 						materialTextureLink.needsCleanup =  true;
 
-						usedTextures.Add (System.Guid.NewGuid ().ToString (), materialTextureLink);
+						usedLightmapTextures.Add (System.Guid.NewGuid ().ToString (), materialTextureLink);
 
 						usedImages.Add (System.Guid.NewGuid ().ToString (), textureImageLink);
 					}
@@ -615,7 +617,8 @@ namespace Three {
 
 					foreach(KeyValuePair<string, Material> usedMaterial in usedMaterials) {
 						if (usedMaterial.Value == mat) {
-							if (mat.HasProperty("_MainTex")) {
+							if (mat.HasProperty("_MainTex") && 
+								mat.GetTexture ("_MainTex")) {
 								mapId = usedMaterial.Key + "_MainTex";
 							}
 							if (mat.HasProperty("_BumpMap") && 
@@ -649,9 +652,9 @@ namespace Three {
 					if (lightmapIndex >= 0) {
 						LightmapData usedLightMap = lightmapData[lightmapIndex];
 
-						foreach(KeyValuePair<string, MaterialTextureLink> usedTexture in usedTextures) {
+						foreach(KeyValuePair<string, MaterialTextureLink> usedTexture in usedLightmapTextures) {
 							if (usedTexture.Value.texture == usedLightMap.lightmapFar) {
-								writeJSON(3, "\"lightMap\": \"" + usedTexture.Key + "\",");
+								writeJSON(3, "\"lightMap\": \"" + usedTexture.Key + "_MainTex\",");
 							}
 						}
 					}				
@@ -1086,11 +1089,26 @@ namespace Three {
 			{
 				int count = 0;		
 
+
+				foreach(KeyValuePair<string, MaterialTextureLink> usedTexture in usedLightmapTextures) {
+					// Quickly mix in the remaining lightmap textures
+					usedMaterials.Add(usedTexture.Key, usedTexture.Value.material);
+				}
+
+
 				foreach(KeyValuePair<string, Material> usedMaterial in usedMaterials) {
 										
 					commonTextures.ForEach (delegate(String texName) {			
-						if (!usedMaterial.Value.HasProperty (texName) || !usedMaterial.Value.GetTexture (texName))
-							return;
+						if (usedMaterial.Value.name != "lightmap") {
+							if (!usedMaterial.Value.HasProperty (texName) || !usedMaterial.Value.GetTexture (texName)) {							
+								return;
+							}
+						}
+						else {
+							if (texName != "_MainTex") {							
+								return;
+							}
+						}
 
 						Texture2D tex = (Texture2D)usedMaterial.Value.GetTexture (texName);
 
@@ -1183,7 +1201,7 @@ namespace Three {
 			writeJSON (0, "}", false);
 
 			// Free created Materials
-			foreach (KeyValuePair<string, MaterialTextureLink> usedTexture in usedTextures) {
+			foreach (KeyValuePair<string, MaterialTextureLink> usedTexture in usedLightmapTextures) {
 				if (usedTexture.Value.needsCleanup) {
 					GameObject.DestroyImmediate(usedTexture.Value.material);
 				}
