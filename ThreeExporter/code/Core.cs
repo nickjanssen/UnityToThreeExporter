@@ -1184,17 +1184,19 @@ namespace Three {
 						
 						writeJSON (2, "}", false);
 
-						if (count < usedMaterials.Count - 1) {
-							writeJSON (0, ",");
-						} else {
-							writeJSON (0, "");
-						}		
+						writeJSON (0, ",");	
 
-					});
+						count++;
 
-					count++;
+					});						
 					
-				}					
+				}
+
+				if (count > 0) {
+					// Remove final comma
+					jsonFile.Length = jsonFile.Length - (1 + System.Environment.NewLine.Length);
+					writeJSON(0, "");					
+				}
 			}	
 			writeJSON (1, "]");
 
