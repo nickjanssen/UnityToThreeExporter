@@ -78,10 +78,10 @@ namespace Three {
 					TextureImporterType oldtype = ti.textureType;
 
 					if (texName == "_BumpMap") {
-						ti.textureType = TextureImporterType.Image;
+						ti.textureType = TextureImporterType.Default;
 					}
 
-					ti.textureFormat = TextureImporterFormat.RGBA32;
+//					ti.textureFormat = TextureImporterFormat.RGBA32;
 					ti.isReadable = true;
 
 					AssetDatabase.ImportAsset(texturePath);
@@ -107,11 +107,11 @@ namespace Three {
 			List<Texture2D> lightmapTextures = new List<Texture2D>();
 			if (settings.exportLightmaps) {
 				for (int i = 0; i < lightmaps.Length; i++) {
-					if (lightmaps [i].lightmapFar) {
-						lightmapTextures.Add (lightmaps [i].lightmapFar);
+					if (lightmaps [i].lightmapLight) {
+						lightmapTextures.Add (lightmaps [i].lightmapLight);
 					}
-					if (lightmaps [i].lightmapNear) {
-						lightmapTextures.Add (lightmaps [i].lightmapNear);
+					if (lightmaps [i].lightmapDir) {
+						lightmapTextures.Add (lightmaps [i].lightmapDir);
 					}
 				}
 			}
@@ -127,19 +127,19 @@ namespace Three {
 				var destFilePNG = System.IO.Path.Combine (settings.saveFolder, System.IO.Path.GetFileName (texturePathPNG));
 
 				TextureImporter ti = (TextureImporter)TextureImporter.GetAtPath (texturePath);			
-				TextureImporterFormat oldformat = ti.textureFormat;
+//				TextureImporterFormat oldformat = ti.textureFormat;
 				TextureImporterType oldType = ti.textureType;
 				TextureImporterSettings textureImporterSettings = new TextureImporterSettings ();
 				if (oldType == TextureImporterType.Lightmap) {
-					ti.textureType = TextureImporterType.Advanced;
-					ti.lightmap = false;
+					ti.textureType = TextureImporterType.Default;
+//					ti.lightmap = false;
 
 					ti.ReadTextureSettings (textureImporterSettings);
 					//				settings.rgbm = TextureImporterRGBMMode.Off;
 					ti.SetTextureSettings (textureImporterSettings);
 				}
 
-				ti.textureFormat = TextureImporterFormat.RGBA32;
+//				ti.textureCompression = TextureImporterCompression.Uncompressed;
 				ti.isReadable = true;
 				ti.SaveAndReimport ();
 
@@ -163,13 +163,11 @@ namespace Three {
 
 				if (oldType == TextureImporterType.Lightmap) {
 					ti.textureType = TextureImporterType.Lightmap;
-					ti.lightmap = true;
 
 					ti.ReadTextureSettings (textureImporterSettings);
-					textureImporterSettings.rgbm = TextureImporterRGBMMode.Auto;
 					ti.SetTextureSettings (textureImporterSettings);
 				}
-				ti.textureFormat = oldformat;
+	
 				ti.isReadable = false;
 				ti.SaveAndReimport ();
 
@@ -345,11 +343,11 @@ namespace Three {
 			LightmapData[] lightmapData = UnityEngine.LightmapSettings.lightmaps;
 			if (settings.exportLightmaps) {
 				for (int i = 0; i < lightmapData.Length; i++) {
-					if (lightmapData [i].lightmapFar) {
+					if (lightmapData [i].lightmapLight) {
 						TextureImageLink textureImageLink;
-						textureImageLink.texture = lightmapData [i].lightmapFar;
+						textureImageLink.texture = lightmapData [i].lightmapLight;
 
-						string texturePath = AssetDatabase.GetAssetPath (lightmapData [i].lightmapFar);
+						string texturePath = AssetDatabase.GetAssetPath (lightmapData [i].lightmapLight);
 						string texturePathPNG = System.IO.Path.ChangeExtension (texturePath, ".png");			
 						textureImageLink.filename = System.IO.Path.GetFileName (texturePathPNG);
 
@@ -368,11 +366,11 @@ namespace Three {
 						usedImages.Add (System.Guid.NewGuid ().ToString (), textureImageLink);
 					}
 
-					if (lightmapData [i].lightmapNear) {
+					if (lightmapData [i].lightmapDir) {
 						TextureImageLink textureImageLink;
-						textureImageLink.texture = lightmapData [i].lightmapNear;
+						textureImageLink.texture = lightmapData [i].lightmapDir;
 
-						string texturePath = AssetDatabase.GetAssetPath (lightmapData [i].lightmapNear);
+						string texturePath = AssetDatabase.GetAssetPath (lightmapData [i].lightmapDir);
 						string texturePathPNG = System.IO.Path.ChangeExtension (texturePath, ".png");			
 						textureImageLink.filename = System.IO.Path.GetFileName (texturePathPNG);
 
@@ -653,7 +651,7 @@ namespace Three {
 						LightmapData usedLightMap = lightmapData[lightmapIndex];
 
 						foreach(KeyValuePair<string, MaterialTextureLink> usedTexture in usedLightmapTextures) {
-							if (usedTexture.Value.texture == usedLightMap.lightmapFar) {
+							if (usedTexture.Value.texture == usedLightMap.lightmapLight) {
 								writeJSON(3, "\"lightMap\": \"" + usedTexture.Key + "_MainTex\",");
 							}
 						}
